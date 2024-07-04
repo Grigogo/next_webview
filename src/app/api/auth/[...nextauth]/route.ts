@@ -4,7 +4,13 @@ import { AuthOptions } from "next-auth";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+// Проверка наличия секретного ключа в переменных окружения
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error("Please define the NEXTAUTH_SECRET environment variable inside .env.local");
+}
+
 const authOptions: AuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -24,7 +30,7 @@ const authOptions: AuthOptions = {
 
       async authorize(credentials) {
         try {
-          // Step 1: Obtain the access token
+          // Шаг 1: Получение токена доступа
           const tokenResponse = await axios.post(
             "https://el2ka.vensta.ru/api/oauth/token",
             {
@@ -33,9 +39,9 @@ const authOptions: AuthOptions = {
             }
           );
 
-          const accessToken = tokenResponse.data.content.accessToken; // Adjust according to the actual response structure
+          const accessToken = tokenResponse.data.content.accessToken; // Корректируйте в зависимости от структуры ответа
 
-          // Step 2: Fetch user data using the access token
+          // Шаг 2: Получение данных пользователя с использованием токена доступа
           const userResponse = await axios.get(
             "https://el2ka.vensta.ru/api/client/data",
             {
@@ -45,13 +51,13 @@ const authOptions: AuthOptions = {
             }
           );
 
-          const userData = userResponse.data.content; // Adjust according to the actual response structure
-          console.log('userData from route', userData)
+          const userData = userResponse.data.content; // Корректируйте в зависимости от структуры ответа
+          console.log('userData from route', userData);
 
-          // Step 3: Return the user data
+          // Шаг 3: Возврат данных пользователя
           return userData;
         } catch (error) {
-          // Handle errors from either request
+          // Обработка ошибок
           console.error("Authentication failed:", error);
           return null;
         }
@@ -60,14 +66,14 @@ const authOptions: AuthOptions = {
   ],
 
   callbacks: {
-    async jwt({token, user}) {
+    async jwt({ token, user }) {
       if (user) token.user = user as unknown as IUser;
-      return token
+      return token;
     },
 
-    async session({token, session}) {
-      session.user = token.user
-      return session
+    async session({ token, session }) {
+      session.user = token.user;
+      return session;
     }
   }
 };
