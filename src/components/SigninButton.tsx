@@ -11,7 +11,7 @@ const SigninButton: FC = () => {
     <div className='flex items-center gap-2'>
       {session && session.user ?
         <>
-          <p>{session.user.email}</p>
+          <p>{session.user.client.name}</p>
           <Link className='text-sky-500 hover:text-sky-600 transition-colors' href={"/api/auth/signout"}>Выйти</Link>
         </> :
         <>
